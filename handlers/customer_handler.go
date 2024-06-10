@@ -39,6 +39,8 @@ func UpdateCustomer(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	customer.ID = id
+
 	if customer.ID != customerID {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized action"})
 	}

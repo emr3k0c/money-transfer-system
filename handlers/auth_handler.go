@@ -31,7 +31,7 @@ func Login(c echo.Context) error {
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["customer_id"] = customer.ID
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 10).Unix()
 
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
