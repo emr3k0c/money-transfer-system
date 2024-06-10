@@ -44,10 +44,19 @@ func UpdateAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid account id"})
 	}
 
-	var account models.Account
-	if err := c.Bind(&account); err != nil {
+	var body struct {
+		Balance float64 `json:"balance"`
+	}
+	if err := c.Bind(&body); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
+
+	account, err := db.GetAccountByID(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	account.Balance = body.Balance
 
 	if account.CustomerID != customerID {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized action"})
@@ -94,8 +103,9 @@ func TransferMoney(c echo.Context) error {
 }
 
 func ListAccounts(c echo.Context) error {
-	user := c.Get("user").(jwt.MapClaims)
-	customerID := int(user["customer_id"].(float64))
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	customerID := int(claims["customer_id"].(float64))
 
 	accounts, err := db.GetAccountsByCustomerID(customerID)
 
